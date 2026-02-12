@@ -1,0 +1,65 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: shipment_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/shipment_db
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: papzzp6H93zsKzzZh0ujlgGqrrkLRPYvmJuaeUYcFOX
+      JSONCARGO_API_KEY: ${JSONCARGO_API_KEY}
+      DATALASTIC_API_KEY: ${DATALASTIC_API_KEY}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build: ./backend
+    command: celery -A app.worker.celery_app worker --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/shipment_db
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: papzzp6H93zsKzzZh0ujlgGqrrkLRPYvmJuaeUYcFOX
+      JSONCARGO_API_KEY: ${JSONCARGO_API_KEY}
+      DATALASTIC_API_KEY: ${DATALASTIC_API_KEY}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+
+  beat:
+    build: ./backend
+    command: celery -A app.worker.celery_app beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/shipment_db
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: papzzp6H93zsKzzZh0ujlgGqrrkLRPYvmJuaeUYcFOX
+      JSONCARGO_API_KEY: ${JSONCARGO_API_KEY}
+      DATALASTIC_API_KEY: ${DATALASTIC_API_KEY}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:

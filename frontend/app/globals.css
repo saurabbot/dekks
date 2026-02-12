@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #FFFFFF;
+    --foreground: #0A0A0A;
+    --muted: #F4F4F4;
+    --muted-foreground: #888888;
+    --border: #EFEFEF;
+    --accent: #F4F4F4;
+    --accent-foreground: #0A0A0A;
+  }
+
+  .dark {
+    --background: #0A0A0A;
+    --foreground: #FFFFFF;
+    --muted: #1A1A1A;
+    --muted-foreground: #888888;
+    --border: #1A1A1A;
+    --accent: #1A1A1A;
+    --accent-foreground: #FFFFFF;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased font-sans;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-muted rounded-full;
+}
+
+.propulsion-gradient {
+  background: radial-gradient(circle at 50% -20%, #FF8A00 0%, transparent 70%);
+  filter: blur(120px);
+}
