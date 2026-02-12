@@ -4,9 +4,13 @@ from app.api import deps
 from app.db import models
 from app.db.session import get_db
 from app.models import schemas
+from app.services.email import email_service
 from app.core import security
+from app.worker.tasks import send_email_verification_mail
 from jose import jwt, JWTError
 from app.core.config import settings
+from datetime import datetime, timedelta
+
 
 router = APIRouter()
 
@@ -27,6 +31,19 @@ async def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     db.refresh(user)
+    verification_token = security.create_verification_token(user.email)
+    token = models.Token(
+        user_id=user.id,
+        token=verification_token,
+        token_type="verification",
+        expires_at=datetime.utcnow() + timedelta(minutes=settings.VERIFICATION_TOKEN_EXPIRE_MINUTES)
+    )
+    db.add(token)
+    db.commit()
+    db.refresh(token)
+    verification_url = f"{settings.FRONTEND_URL}/verify-email?token={verification_token}"
+    html_content = email_service.get_welcome_mail_content(user.email, user.first_name, verification_url)
+    send_email_verification_mail.delay(user.email, "🚢 Welcome to Dekks - Verify Your Account", html_content)
     return user
 
 @router.post("/login", response_model=schemas.Token)

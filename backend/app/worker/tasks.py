@@ -47,3 +47,8 @@ def update_all_shipments():
 @shared_task
 def send_notification_email(recipient_email: str, subject: str, html_content: str):
     email_service.send_email(recipient_email, subject, html_content)
+
+
+@shared_task
+def send_email_verification_mail(recipient_email: str, subject: str, html_content: str):
+    email_service.send_email(recipient_email, subject, html_content)
