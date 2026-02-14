@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 const SHIPPING_LINES = [
-  "MAERSK", "HAPAG_LLOYD", "HMM", "ONE", "EVERGREEN", 
+  "MAERSK", "HAPAG_LLOYD", "HMM", "ONE", "EVERGREEN",
   "MSC", "CMA_CGM", "COSCO", "ZIM", "YANG_MING"
 ];
 
@@ -51,40 +51,48 @@ export const CreateShipmentModal = ({ isOpen, onClose, onSuccess }: CreateShipme
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md p-0 border-border/40 bg-muted/20 rounded-[2rem] overflow-hidden">
-        <div className="bg-background rounded-[1.5rem] h-full flex flex-col border border-border/40 overflow-hidden m-3">
-          <DialogHeader className="p-6 border-b border-border/40 bg-muted/10 flex-row items-center justify-between space-y-0">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-[#FF8A00] rounded-xl flex items-center justify-center text-black shadow-lg">
-                <Plus className="w-5 h-5" />
-              </div>
-              <DialogTitle className="text-xl font-black text-foreground tracking-tighter uppercase">New Shipment</DialogTitle>
-              <DialogDescription className="sr-only">
-                Register a new container for tracking
-              </DialogDescription>
-            </div>
-          </DialogHeader>
+      <DialogContent className="max-w-md p-0 border-none bg-transparent shadow-none overflow-visible">
+        <div className="bg-[#050505] rounded-[2.5rem] border border-white/10 overflow-hidden relative shadow-[0_0_80px_rgba(0,0,0,0.9)]">
+          {/* Close Button Trigger for accessibility, but we have onOpenChange */}
+          <DialogTitle className="sr-only">New Shipment Registration</DialogTitle>
+          <DialogDescription className="sr-only">Register your container ID to begin real-time fleet monitoring.</DialogDescription>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="p-8 pb-4">
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 bg-[#FF8A00] rounded-2xl flex items-center justify-center text-black shadow-[0_0_40px_rgba(255,138,0,0.3)] shrink-0">
+                <Plus className="w-7 h-7 stroke-[3]" />
+              </div>
+              <div className="space-y-0.5">
+                <h2 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">New Shipment</h2>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fleet Expansion Unit</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-8 py-2">
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-8 space-y-8">
             {error && (
-              <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-[10px] font-bold flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                {error}
+              <div className="p-4 bg-red-500/5 border border-red-500/20 text-red-500 rounded-2xl text-[10px] font-black flex items-center gap-3">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_#ef4444]" />
+                <span className="uppercase tracking-widest">{error}</span>
               </div>
             )}
 
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div className="group">
-                <label className="block text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-2.5 ml-1">Container Number</label>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Container Number</label>
                 <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    <Package className="w-4 h-4" />
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#FF8A00] transition-colors">
+                    <Package className="w-5 h-5" />
                   </div>
                   <input
                     type="text"
                     required
-                    placeholder="ENTER ID..."
-                    className="w-full pl-12 pr-5 py-4 bg-muted/5 border border-border/40 rounded-xl outline-none focus:border-[#FF8A00]/50 focus:bg-background transition-all font-bold text-foreground placeholder:text-muted-foreground/30 uppercase tracking-wider shadow-sm text-sm"
+                    placeholder="ENTER ID... (e.g. MEDU9091004)"
+                    className="w-full pl-14 pr-6 py-5 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:border-[#FF8A00]/40 focus:bg-white/[0.05] transition-all font-black text-white placeholder:text-gray-700 uppercase tracking-wider text-sm shadow-inner"
                     value={containerId}
                     onChange={(e) => setContainerId(e.target.value)}
                   />
@@ -92,39 +100,40 @@ export const CreateShipmentModal = ({ isOpen, onClose, onSuccess }: CreateShipme
               </div>
 
               <div className="group">
-                <label className="block text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-2.5 ml-1">Shipping Carrier</label>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Shipping Carrier</label>
                 <div className="relative">
                   <select
-                    className="w-full px-5 py-4 bg-muted/5 border border-border/40 rounded-xl outline-none focus:border-[#FF8A00]/50 focus:bg-background transition-all font-bold text-foreground appearance-none cursor-pointer shadow-sm uppercase tracking-wider text-sm"
+                    className="w-full px-6 py-5 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:border-[#FF8A00]/40 focus:bg-white/[0.05] transition-all font-black text-white appearance-none cursor-pointer uppercase tracking-wider text-sm shadow-inner"
                     value={shippingLine}
                     onChange={(e) => setShippingLine(e.target.value)}
                   >
                     {SHIPPING_LINES.map(line => (
-                      <option key={line} value={line} className="bg-background text-sm">{line.replace('_', ' ')}</option>
+                      <option key={line} value={line} className="bg-[#0A0A0A] text-white py-4 capitalize font-bold">
+                        {line.replace('_', ' ')}
+                      </option>
                     ))}
                   </select>
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                    <ChevronDown className="w-4 h-4" />
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                    <ChevronDown className="w-5 h-5" />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-4">
               <Button
                 type="submit"
                 disabled={loading}
-                variant="default"
+                className="w-full py-8 bg-[#FF8A00] hover:bg-[#FF9D29] text-black font-black rounded-2xl uppercase tracking-[0.2em] text-[12px] shadow-[0_0_40px_rgba(255,138,0,0.2)] hover:shadow-[0_0_50px_rgba(255,138,0,0.4)] transition-all ring-offset-black"
                 size="lg"
-                className="w-full py-6 font-black rounded-xl uppercase tracking-widest text-[11px]"
               >
                 {loading ? (
-                  <RefreshCw className="w-5 h-5 animate-spin" />
+                  <RefreshCw className="w-6 h-6 animate-spin" />
                 ) : (
-                  <>
-                    <Plus className="w-4 h-4" />
-                    REGISTER SHIPMENT
-                  </>
+                  <div className="flex items-center gap-3">
+                    <Plus className="w-5 h-5 stroke-[4]" />
+                    <span>Register Shipment</span>
+                  </div>
                 )}
               </Button>
             </div>

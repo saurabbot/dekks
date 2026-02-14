@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Enum
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Enum, Float
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db.session import Base
@@ -12,6 +12,14 @@ class User(Base):
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     is_email_verified = Column(Boolean, default=False)
+    
+    # Notification Preferences
+    notify_on_arrival = Column(Boolean, default=True)
+    notify_on_departure = Column(Boolean, default=True)
+    notify_on_delay = Column(Boolean, default=True)
+    notify_via_email = Column(Boolean, default=True)
+    notify_via_whatsapp = Column(Boolean, default=False)
+    whatsapp_number = Column(String, nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -38,6 +46,7 @@ class Shipment(Base):
     
     atd_origin = Column(DateTime, nullable=True)
     eta_final_destination = Column(DateTime, nullable=True)
+    ata_final_destination = Column(DateTime, nullable=True)
     
     last_location = Column(String, nullable=True)
     last_location_terminal = Column(String, nullable=True)
@@ -57,8 +66,17 @@ class Shipment(Base):
     current_vessel_name = Column(String, nullable=True)
     current_voyage_number = Column(String, nullable=True)
     
+    vessel_lat = Column(Float, nullable=True)
+    vessel_lon = Column(Float, nullable=True)
+    vessel_speed = Column(Float, nullable=True)
+    vessel_course = Column(Float, nullable=True)
+    
     last_updated_at = Column(DateTime, nullable=True)
     
+    share_token = Column(String, unique=True, index=True, nullable=True)
+    is_public = Column(Boolean, default=False)
+    co2_emissions = Column(Float, nullable=True)
+
     user = relationship("User", back_populates="shipments")
     history = relationship("ShipmentHistory", back_populates="shipment", cascade="all, delete-orphan")
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -75,6 +93,9 @@ class ShipmentHistory(Base):
     next_location_terminal = Column(String, nullable=True)
     current_vessel_name = Column(String, nullable=True)
     current_voyage_number = Column(String, nullable=True)
+    vessel_lat = Column(Float, nullable=True)
+    vessel_lon = Column(Float, nullable=True)
+    vessel_speed = Column(Float, nullable=True)
     last_updated_at = Column(DateTime, nullable=True)
     last_movement_timestamp = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -93,3 +114,19 @@ class Token(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     user = relationship("User", back_populates="tokens")
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    shipment_id = Column(Integer, ForeignKey("shipments.id"))
+    
+    title = Column(String, nullable=False)
+    message = Column(String, nullable=False)
+    type = Column(String, nullable=False) # e.g., 'ARRIVAL', 'DEPARTURE', 'DELAY'
+    is_read = Column(Boolean, default=False)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    user = relationship("User")
+    shipment = relationship("Shipment")

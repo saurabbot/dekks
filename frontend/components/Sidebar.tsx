@@ -28,7 +28,7 @@ export const Sidebar = () => {
     { name: 'Overview', icon: LayoutDashboard, href: '/dashboard', disabled: false },
     { name: 'Shipments', icon: Package, href: '/dashboard/shipments', disabled: false },
     { name: 'Customers', icon: Users, href: '/dashboard/customers', disabled: true },
-    { name: 'Analytics', icon: BarChart3, href: '/dashboard/analytics', disabled: true },
+    { name: 'Analytics', icon: BarChart3, href: '/dashboard/analytics', disabled: false },
     { name: 'Inventory', icon: Store, href: '/dashboard/shop', disabled: true },
     { name: 'Payments', icon: Wallet, href: '/dashboard/promote', disabled: true },
   ];

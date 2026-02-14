@@ -10,6 +10,12 @@ type User = {
   first_name: string;
   last_name: string;
   is_email_verified: boolean;
+  notify_on_arrival: boolean;
+  notify_on_departure: boolean;
+  notify_on_delay: boolean;
+  notify_via_email: boolean;
+  notify_via_whatsapp: boolean;
+  whatsapp_number: string | null;
 };
 
 type AuthContextType = {

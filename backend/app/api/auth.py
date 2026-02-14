@@ -92,3 +92,17 @@ async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
 @router.get("/me", response_model=schemas.User)
 async def get_current_user(current_user: models.User = Depends(deps.get_current_user)):
     return current_user
+
+@router.patch("/me", response_model=schemas.User)
+async def update_user_me(
+    user_in: schemas.UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    user_data = user_in.model_dump(exclude_unset=True)
+    for field in user_data:
+        setattr(current_user, field, user_data[field])
+    
+    db.commit()
+    db.refresh(current_user)
+    return current_user

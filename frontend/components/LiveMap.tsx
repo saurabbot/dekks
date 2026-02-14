@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import api from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ship, Navigation, Anchor, Activity, Clock } from 'lucide-react';
 
@@ -65,10 +66,34 @@ const MOCK_SHIPMENTS = [
 export const LiveMap = () => {
     const [isMounted, setIsMounted] = useState(false);
     const [hoveredShipment, setHoveredShipment] = useState<any>(null);
+    const [shipments, setShipments] = useState<any[]>([]);
 
     useEffect(() => {
         setIsMounted(true);
+        fetchShipments();
     }, []);
+
+    const fetchShipments = async () => {
+        try {
+            const res = await api.get('/shipments/');
+            // Transform DB shipments to Map format
+            const mapped = res.data.map((s: any) => ({
+                id: s.container_id,
+                vessel: s.current_vessel_name || 'Unknown Vessel',
+                // Use vessel lat/lon first, then fallback to estimated position
+                lat: s.vessel_lat || 20,
+                lng: s.vessel_lon || 0,
+                status: s.container_status || 'Unknown',
+                speed: s.vessel_speed ? `${s.vessel_speed} kn` : '0 kn',
+                destination: s.shipped_to || 'Unknown',
+                eta: s.eta_final_destination,
+                is_live: !!s.vessel_lat
+            })).filter((s: any) => s.lat !== null && s.lng !== null);
+            setShipments(mapped);
+        } catch (err) {
+            console.error('Failed to fetch map shipments');
+        }
+    };
 
     if (!isMounted) return (
         <div className="w-full h-full bg-[#080808] animate-pulse flex items-center justify-center rounded-[2.5rem]">
@@ -81,10 +106,10 @@ export const LiveMap = () => {
             <MapContainer
                 center={[20, 0]}
                 zoom={2}
-                minZoom={2}  // Prevents zooming out beyond world view
-                maxZoom={18}  // Optional: limit zoom in
-                maxBounds={[[-85, -180], [85, 180]]}  // Prevents panning outside world
-                maxBoundsViscosity={1.0}  // Makes bounds "hard" (no bouncing)
+                minZoom={2}
+                maxZoom={18}
+                maxBounds={[[-85, -180], [85, 180]]}
+                maxBoundsViscosity={1.0}
                 style={{ height: '100%', width: '100%', background: '#080808' }}
                 zoomControl={false}
                 attributionControl={false}
@@ -93,19 +118,8 @@ export const LiveMap = () => {
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 />
 
-                {MOCK_SHIPMENTS.map((ship) => (
+                {shipments.map((ship) => (
                     <React.Fragment key={ship.id}>
-                        {/* Route Polyline */}
-                        <Polyline
-                            positions={ship.route as any}
-                            pathOptions={{
-                                color: '#FF8A00',
-                                weight: 1,
-                                opacity: 0.1,
-                                dashArray: '5, 10'
-                            }}
-                        />
-
                         <Marker
                             position={[ship.lat, ship.lng]}
                             icon={vesselIcon}
@@ -118,7 +132,10 @@ export const LiveMap = () => {
                                 <div className="bg-[#0A0A0A] border border-white/10 p-3 rounded-xl min-w-[200px]">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-[10px] font-bold text-propulsion-orange uppercase tracking-widest">{ship.id}</span>
-                                        <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 text-[9px] font-bold uppercase">{ship.status}</span>
+                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${ship.is_live ? 'bg-propulsion-orange/10 text-propulsion-orange' : 'bg-gray-500/10 text-gray-500'
+                                            }`}>
+                                            {ship.is_live ? 'LIVE AIS' : 'ESTIMATED'}
+                                        </span>
                                     </div>
                                     <h3 className="text-white font-bold text-sm mb-3 tracking-tight">{ship.vessel}</h3>
 
@@ -128,8 +145,8 @@ export const LiveMap = () => {
                                             <p className="text-[11px] text-white font-medium">{ship.speed}</p>
                                         </div>
                                         <div>
-                                            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Next Port</p>
-                                            <p className="text-[11px] text-white font-medium">{ship.destination}</p>
+                                            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-wider">Destination</p>
+                                            <p className="text-[11px] text-white font-medium truncate max-w-[80px]">{ship.destination}</p>
                                         </div>
                                     </div>
                                 </div>

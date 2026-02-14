@@ -7,6 +7,7 @@ from app.db.session import get_db
 from app.models import schemas
 from app.services.jsoncargo import JsonCargoService
 from app.services.datalastic import DataLasticService
+import uuid
 
 router = APIRouter()
 
@@ -124,6 +125,70 @@ async def find_datalastic_vessels(
     if not result.success:
         raise HTTPException(status_code=result.status_code or 400, detail=result.error)
     return result.data
+
+@router.post("/trigger-update")
+async def trigger_update_all(
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    from app.worker.tasks import update_all_shipments
+    update_all_shipments.delay()
+    return {"message": "Update task triggered"}
+
+@router.post("/{shipment_id}/share", response_model=schemas.Shipment)
+async def share_shipment(
+    shipment_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    shipment = db.query(models.Shipment).filter(
+        models.Shipment.id == shipment_id,
+        models.Shipment.user_id == current_user.id
+    ).first()
+    
+    if not shipment:
+        raise HTTPException(status_code=404, detail="Shipment not found")
+    
+    if not shipment.share_token:
+        shipment.share_token = str(uuid.uuid4())
+    
+    shipment.is_public = True
+    db.commit()
+    db.refresh(shipment)
+    return shipment
+
+@router.post("/{shipment_id}/unshare", response_model=schemas.Shipment)
+async def unshare_shipment(
+    shipment_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    shipment = db.query(models.Shipment).filter(
+        models.Shipment.id == shipment_id,
+        models.Shipment.user_id == current_user.id
+    ).first()
+    
+    if not shipment:
+        raise HTTPException(status_code=404, detail="Shipment not found")
+    
+    shipment.is_public = False
+    db.commit()
+    db.refresh(shipment)
+    return shipment
+
+@router.get("/public/{share_token}", response_model=schemas.Shipment)
+async def get_public_shipment(
+    share_token: str,
+    db: Session = Depends(get_db)
+):
+    shipment = db.query(models.Shipment).filter(
+        models.Shipment.share_token == share_token,
+        models.Shipment.is_public == True
+    ).first()
+    
+    if not shipment:
+        raise HTTPException(status_code=404, detail="Public shipment not found or sharing is disabled")
+    
+    return shipment
 
 @router.get("/datalastic/ports/find")
 async def find_datalastic_ports(

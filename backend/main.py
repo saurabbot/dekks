@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, shipment, email
+from app.api import auth, shipment, email, notifications, analytics
 from app.websocket import manager
 
 app = FastAPI(title="Dekks API")
@@ -16,6 +16,8 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(email.router, prefix="/email", tags=["email"])
 app.include_router(shipment.router, prefix="/shipments", tags=["shipments"])
+app.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+app.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 
 @app.get("/health")
 async def health_check():

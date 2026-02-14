@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useMemo, type ReactNode } from 'react';
 import { ModeToggle } from '@/components/mode-toggle';
 import { useAuth } from '@/context/auth-context';
+import { NotificationBell } from '@/components/NotificationBell';
 
 type NavbarProps = {
   title?: string;
@@ -54,6 +55,7 @@ export const Navbar = ({ title, rightSlot }: NavbarProps) => {
 
         <div className="flex items-center gap-3">
           {rightSlot}
+          <NotificationBell />
           <ModeToggle />
           <div className="flex items-center gap-3 rounded-xl px-3 py-1.5 bg-accent/50 hover:bg-accent transition-colors cursor-pointer">
             <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground">

@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/auth-context';
 import dynamic from 'next/dynamic';
+import { Globe } from 'lucide-react';
 
 const LiveMap = dynamic(
   () => import('@/components/LiveMap').then((mod) => mod.LiveMap),
@@ -18,6 +19,15 @@ const fadeInUp = {
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.6, ease: "easeOut" }
 };
+const HealthItem = ({ label, value, color }: { label: string, value: string, color: string }) => (
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-2">
+      <div className={`w-1.5 h-1.5 rounded-full ${color}`} />
+      <span className="text-xs font-bold text-gray-400 uppercase tracking-tight">{label}</span>
+    </div>
+    <span className="text-sm font-black text-white">{value}</span>
+  </div>
+);
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -57,15 +67,53 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      {/* Primary Intelligence Map */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2, duration: 0.8 }}
-        className="aspect-[21/9] w-full min-h-[500px] relative"
-      >
-        <LiveMap />
-      </motion.div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3 aspect-[21/9] w-full min-h-[500px] relative">
+          <LiveMap />
+        </div>
+
+        <div className="space-y-6">
+          <motion.div
+            variants={fadeInUp}
+            className="p-8 bg-[#0A0A0A] border border-[#00FFBD]/20 rounded-[2.2rem] space-y-6 relative overflow-hidden group shadow-[0_20px_40px_rgba(0,255,189,0.05)]"
+          >
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#00FFBD]/10 rounded-lg text-[#00FFBD]">
+                  <Globe className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Sustainability</span>
+              </div>
+              <div>
+                <h3 className="text-3xl font-black text-white tracking-tighter uppercase leading-none mb-1">Fleet Impact</h3>
+                <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Estimated CO2 Footprint</p>
+              </div>
+              <div className="pt-4">
+                <div className="text-4xl font-black text-[#00FFBD] tracking-tighter">4.2t <span className="text-lg font-bold text-[#00FFBD]/50">CO2</span></div>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="px-2 py-0.5 bg-[#00FFBD]/10 text-[#00FFBD] text-[9px] font-black rounded-full uppercase tracking-widest">-12% Saved</span>
+                  <span className="text-[9px] font-bold text-gray-600 uppercase">vs Last Month</span>
+                </div>
+              </div>
+            </div>
+            <Globe className="absolute -bottom-10 -right-10 w-40 h-40 text-[#00FFBD]/5 group-hover:rotate-12 transition-transform duration-1000" />
+          </motion.div>
+
+          <motion.div
+            variants={fadeInUp}
+            className="p-8 bg-[#0A0A0A] border border-white/5 rounded-[2.2rem] space-y-6 relative group"
+          >
+            <div className="space-y-4">
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Fleet Health</div>
+              <div className="space-y-3">
+                <HealthItem label="On-time Ratio" value="94%" color="bg-emerald-500" />
+                <HealthItem label="Active Delays" value="2" color="bg-red-500" />
+                <HealthItem label="Efficiency" value="88%" color="bg-propulsion-orange" />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
     </div>
   );
 }
