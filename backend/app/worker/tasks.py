@@ -51,6 +51,7 @@ def update_all_shipments():
                     vessel_imo = data.get("imo")
                     if vessel_imo:
                         vessel_res = datalastic_service.get_vessel_live(imo=vessel_imo)
+                        print(vessel_res, 'datalastic resp')
                         if vessel_res.success and vessel_res.data:
                             v_data = vessel_res.data.get("vessel", {})
                             shipment.vessel_lat = v_data.get("lat")
