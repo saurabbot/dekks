@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Loader2, Mail } from 'lucide-react';
@@ -15,7 +15,7 @@ const fadeInUp = {
     transition: { duration: 0.6, ease: "easeOut" }
 };
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
@@ -217,3 +217,16 @@ export default function VerifyEmailPage() {
         </div>
     );
 }
+
+export default function VerifyEmailPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-propulsion-orange animate-spin" />
+            </div>
+        }>
+            <VerifyEmailContent />
+        </Suspense>
+    );
+}
+
