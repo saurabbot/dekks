@@ -18,6 +18,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Dekks",
   description: "Scale your logistics",
+  icons: {
+    icon: [
+      {
+        media: '(prefers-color-scheme: light)',
+        url: '/icon_black.svg',
+        href: '/icon_black.svg',
+      },
+      {
+        media: '(prefers-color-scheme: dark)',
+        url: '/icon_white.svg',
+        href: '/icon_white.svg',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
