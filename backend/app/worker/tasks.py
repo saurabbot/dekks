@@ -3,6 +3,7 @@ from app.db.session import SessionLocal
 from app.db import models
 from app.services.jsoncargo import JsonCargoService
 from app.services.datalastic import DataLasticService
+from app.services.aisstream import AISStreamService
 from app.services.email import email_service
 from datetime import datetime, timedelta
 import logging
@@ -16,13 +17,15 @@ def update_all_shipments():
         shipments = db.query(models.Shipment).all()
         jsoncargo_service = JsonCargoService()
         datalastic_service = DataLasticService()
+        aisstream_service = AISStreamService()
         
         for shipment in shipments:
+            container_id = shipment.container_id
             try:
-                if shipment.updated_at is not None and shipment.updated_at > datetime.utcnow() - timedelta(minutes=30):
-                    logger.info(f"Skipping recently updated shipment: {shipment.container_id}")
+                if shipment.updated_at is not None and shipment.updated_at > datetime.utcnow() - timedelta(minutes=1):
+                    logger.info(f"Skipping recently updated shipment: {container_id}")
                     continue
-                logger.info(f"Updating shipment: {shipment.container_id}")
+                logger.info(f"Updating shipment: {container_id}")
                 tracking_result = jsoncargo_service.track_shipment_details(
                     shipment.container_id, 
                     shipment.shipping_line_name, 
@@ -54,6 +57,17 @@ def update_all_shipments():
                             shipment.vessel_lon = v_data.get("lon")
                             shipment.vessel_speed = v_data.get("speed")
                             shipment.vessel_course = v_data.get("course")
+                            
+                            # Fallback to AISStream if coordinates are still missing and we have MMSI
+                            if not shipment.vessel_lat and v_data.get("mmsi"):
+                                logger.info(f"DataLastic coordinates missing. Trying AISStream for MMSI: {v_data.get('mmsi')}")
+                                ais_data = aisstream_service.get_vessel_position(mmsi=v_data.get("mmsi"))
+                                if ais_data:
+                                    shipment.vessel_lat = ais_data.get("lat")
+                                    shipment.vessel_lon = ais_data.get("lon")
+                                    shipment.vessel_speed = ais_data.get("speed")
+                                    shipment.vessel_course = ais_data.get("course")
+                                    logger.info(f"AISStream provided coordinates for {container_id}")
                     
                     # Log History
                     history_record = models.ShipmentHistory(
@@ -89,13 +103,13 @@ def update_all_shipments():
                     
                     # Detect Changes and Notify
                     if new_status and new_status != old_status:
-                        logger.info(f"Status change detected for {shipment.container_id}: {old_status} -> {new_status}")
+                        logger.info(f"Status change detected for {container_id}: {old_status} -> {new_status}")
                         
                         # Create In-app Notification
                         notification = models.Notification(
                             user_id=shipment.user_id,
                             shipment_id=shipment.id,
-                            title=f"Shipment Update: {shipment.container_id}",
+                            title=f"Shipment Update: {container_id}",
                             message=f"Status changed from {old_status} to {new_status}",
                             type="STATUS_CHANGE"
                         )
@@ -106,14 +120,14 @@ def update_all_shipments():
                         if user and user.notify_via_email:
                             email_service.send_shipment_update(
                                 user.email, 
-                                shipment.container_id, 
+                                container_id, 
                                 new_status
                             )
                     
                     db.commit()
             except Exception as e:
-                logger.error(f"Failed to update shipment {shipment.container_id}: {str(e)}")
                 db.rollback()
+                logger.error(f"Failed to update shipment {container_id}: {str(e)}")
                 
     finally:
         db.close()
