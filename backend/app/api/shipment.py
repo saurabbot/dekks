@@ -31,6 +31,9 @@ async def create_shipment(
     shipment = models.Shipment(
         container_id=shipment_in.container_id,
         shipping_line_name=shipment_in.shipping_line.value,
+        final_destination=shipment_in.final_destination,
+        final_destination_port=shipment_in.final_destination_port,
+        final_destination_eta=shipment_in.final_destination_eta,
         user_id=current_user.id,
         container_status="Pending"
     )
@@ -38,6 +41,8 @@ async def create_shipment(
     db.add(shipment)
     db.commit()
     db.refresh(shipment)
+    from app.worker.tasks import update_all_shipments
+    update_all_shipments.delay()
     return shipment
 
 @router.get("/", response_model=list[schemas.Shipment])

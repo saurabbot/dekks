@@ -37,6 +37,9 @@ class Shipment(Base):
     container_status = Column(String, nullable=True)
     shipping_line_name = Column(String, nullable=True)
     shipping_line_id = Column(String, nullable=True)
+    final_destination = Column(String, nullable=True)
+    final_destination_port = Column(String, nullable=True)
+    final_destination_eta = Column(DateTime, nullable=True)
     tare = Column(String, nullable=True)
     
     shipped_from = Column(String, nullable=True)

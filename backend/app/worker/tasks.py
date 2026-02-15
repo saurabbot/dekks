@@ -22,7 +22,7 @@ def update_all_shipments():
         for shipment in shipments:
             container_id = shipment.container_id
             try:
-                if shipment.updated_at is not None and shipment.updated_at > datetime.utcnow() - timedelta(minutes=1):
+                if shipment.updated_at is not None and shipment.updated_at > datetime.utcnow() - timedelta(minutes=30):
                     logger.info(f"Skipping recently updated shipment: {container_id}")
                     continue
                 logger.info(f"Updating shipment: {container_id}")

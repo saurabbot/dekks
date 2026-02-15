@@ -60,6 +60,9 @@ class ShipmentBase(BaseModel):
 class ShipmentCreate(BaseModel):
     container_id: str
     shipping_line: ShippingLine
+    final_destination: Optional[str] = None
+    final_destination_port: Optional[str] = None
+    final_destination_eta: Optional[datetime] = None
 
 class Shipment(ShipmentBase):
     id: int
@@ -67,6 +70,9 @@ class Shipment(ShipmentBase):
     container_type: Optional[str] = None
     container_status: Optional[str] = None
     tare: Optional[str] = None
+    final_destination: Optional[str] = None
+    final_destination_port: Optional[str] = None
+    final_destination_eta: Optional[datetime] = None
     shipped_from: Optional[str] = None
     shipped_from_terminal: Optional[str] = None
     shipped_to: Optional[str] = None
@@ -109,6 +115,7 @@ class Shipment(ShipmentBase):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
 
 class TokenData(BaseModel):

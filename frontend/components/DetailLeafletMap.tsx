@@ -68,7 +68,7 @@ export const DetailLeafletMap = ({ shipment, className = "h-full" }: DetailLeafl
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
         <MapController center={center} />
-        
+
         {/* Route Line */}
         <Polyline
           positions={route}
@@ -86,32 +86,32 @@ export const DetailLeafletMap = ({ shipment, className = "h-full" }: DetailLeafl
       {/* Floating Info Overlays to match Screenshot */}
       <div className="absolute top-4 left-4 z-[1000] space-y-2 pointer-events-none">
         <div className="bg-black/60 backdrop-blur-md border border-white/10 p-2 rounded-lg flex items-center gap-2">
-            <Anchor className="w-3 h-3 text-propulsion-orange" />
-            <div className="leading-tight">
-                <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Origin</p>
-                <p className="text-[10px] text-white font-bold">{shipment.shipped_from || 'Loading Port'}</p>
-            </div>
+          <Anchor className="w-3 h-3 text-propulsion-orange" />
+          <div className="leading-tight">
+            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Origin</p>
+            <p className="text-[10px] text-white font-bold">{shipment.shipped_from || 'Loading Port'}</p>
+          </div>
         </div>
       </div>
 
       <div className="absolute top-4 right-4 z-[1000] pointer-events-none">
         <div className="bg-black/60 backdrop-blur-md border border-white/10 p-2 rounded-lg flex items-center gap-2">
-            <MapPin className="w-3 h-3 text-gray-500" />
-            <div className="leading-tight text-right">
-                <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Destination</p>
-                <p className="text-[10px] text-white font-bold">{shipment.shipped_to || 'Final Port'}</p>
-            </div>
+          <MapPin className="w-3 h-3 text-gray-500" />
+          <div className="leading-tight text-right">
+            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Destination</p>
+            <p className="text-[10px] text-white font-bold">{shipment.final_destination_port || shipment.shipped_to || 'Final Port'}</p>
+          </div>
         </div>
       </div>
 
       <div className="absolute bottom-4 left-4 right-4 z-[1000] flex justify-between items-end pointer-events-none">
         <div className="bg-black/40 backdrop-blur-md p-3 rounded-xl border border-white/5 space-y-1">
-            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Vessel</p>
-            <p className="text-xs text-white font-bold">{shipment.current_vessel_name || 'Detecting...'}</p>
+          <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Vessel</p>
+          <p className="text-xs text-white font-bold">{shipment.current_vessel_name || 'Detecting...'}</p>
         </div>
         <div className="bg-black/40 backdrop-blur-md p-3 rounded-xl border border-white/5 text-right space-y-1">
-            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Speed / ETA</p>
-            <p className="text-xs text-white font-bold">14.2 kn / {shipment.eta_final_destination ? new Date(shipment.eta_final_destination).toLocaleDateString() : 'TBD'}</p>
+          <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Speed / ETA</p>
+          <p className="text-xs text-white font-bold">14.2 kn / {shipment.final_destination_eta || shipment.eta_final_destination ? new Date(shipment.final_destination_eta || shipment.eta_final_destination).toLocaleDateString() : 'TBD'}</p>
         </div>
       </div>
 

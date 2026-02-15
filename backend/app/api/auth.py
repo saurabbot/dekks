@@ -51,10 +51,12 @@ async def login(user_in: schemas.UserLogin, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == user_in.email).first()
     if not user or not security.verify_password(user_in.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
+    access_token = security.create_access_token(user.email)
+    refresh_token = security.create_refresh_token(user.email)
     
     return {
-        "access_token": security.create_access_token(user.email),
-        "refresh_token": security.create_refresh_token(user.email),
+        "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
     }
 

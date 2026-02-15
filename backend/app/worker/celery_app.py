@@ -16,7 +16,7 @@ celery_app.conf.update(
     beat_schedule={
         "update-shipments-every-30-minutes": {
             "task": "app.worker.tasks.update_all_shipments",
-            "schedule": 60.0, 
+            "schedule": 1800.0, 
         },
     },
 )

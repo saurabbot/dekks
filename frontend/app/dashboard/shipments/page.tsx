@@ -291,7 +291,9 @@ export default function ShipmentsPage() {
                         <MapPin className="w-4 h-4 text-gray-500" />
                         <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Destination</span>
                       </div>
-                      <span className="text-sm font-bold text-white">{shipment.shipped_to || 'Unknown'}</span>
+                      <span className="text-sm font-bold text-white truncate max-w-[150px]">
+                        {shipment.final_destination_port || shipment.final_destination || shipment.shipped_to || 'Unknown'}
+                      </span>
                     </div>
 
                     <div className="flex flex-col justify-center">

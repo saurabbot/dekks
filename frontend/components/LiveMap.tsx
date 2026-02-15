@@ -77,18 +77,28 @@ export const LiveMap = () => {
         try {
             const res = await api.get('/shipments/');
             // Transform DB shipments to Map format
-            const mapped = res.data.map((s: any) => ({
-                id: s.container_id,
-                vessel: s.current_vessel_name || 'Unknown Vessel',
-                // Use vessel lat/lon first, then fallback to estimated position
-                lat: s.vessel_lat || 20,
-                lng: s.vessel_lon || 0,
-                status: s.container_status || 'Unknown',
-                speed: s.vessel_speed ? `${s.vessel_speed} kn` : '0 kn',
-                destination: s.shipped_to || 'Unknown',
-                eta: s.eta_final_destination,
-                is_live: !!s.vessel_lat
-            })).filter((s: any) => s.lat !== null && s.lng !== null);
+            console.log(res.data);
+            const mapped = res.data.map((s: any, index: number) => {
+                const lat = s.vessel_lat || 20;
+                const lng = s.vessel_lon || 0;
+
+                // Add a small jitter for overlapping coordinates (like the default 20, 0)
+                // This ensures that even if they are at the same spot, you can see multiple markers
+                const jitterLat = lat + (Math.random() - 0.5) * 2.0;
+                const jitterLng = lng + (Math.random() - 0.5) * 2.0;
+
+                return {
+                    id: s.container_id,
+                    vessel: s.current_vessel_name || 'Unknown Vessel',
+                    lat: jitterLat,
+                    lng: jitterLng,
+                    status: s.container_status || 'Unknown',
+                    speed: s.vessel_speed ? `${s.vessel_speed} kn` : '0 kn',
+                    destination: s.shipped_to || 'Unknown',
+                    eta: s.eta_final_destination,
+                    is_live: !!s.vessel_lat
+                };
+            }).filter((s: any) => s.lat !== null && s.lng !== null);
             setShipments(mapped);
         } catch (err) {
             console.error('Failed to fetch map shipments');

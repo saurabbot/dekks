@@ -17,6 +17,23 @@ const SHIPPING_LINES = [
   "MSC", "CMA_CGM", "COSCO", "ZIM", "YANG_MING"
 ];
 
+const MIDDLE_EAST_PORTS = [
+  "JEBEL ALI, UAE",
+  "ABU DHABI, UAE",
+  "KHALIFA, UAE",
+  "DAMMAM, SAUDI ARABIA",
+  "JEDDAH, SAUDI ARABIA",
+  "HAMAD, QATAR",
+  "SHUWAIKH, KUWAIT",
+  "KHALIFA BIN SALMAN, BAHRAIN",
+  "SALALAH, OMAN",
+  "SOHAR, OMAN",
+  "AQABA, JORDAN",
+  "UMM QASR, IRAQ",
+  "PORT SAID, EGYPT",
+  "ALEXANDRIA, EGYPT"
+];
+
 interface CreateShipmentModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,6 +43,9 @@ interface CreateShipmentModalProps {
 export const CreateShipmentModal = ({ isOpen, onClose, onSuccess }: CreateShipmentModalProps) => {
   const [containerId, setContainerId] = useState('');
   const [shippingLine, setShippingLine] = useState(SHIPPING_LINES[0]);
+  const [finalDestination, setFinalDestination] = useState('');
+  const [finalDestinationPort, setFinalDestinationPort] = useState(MIDDLE_EAST_PORTS[0]);
+  const [estimatedEta, setEstimatedEta] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -36,10 +56,16 @@ export const CreateShipmentModal = ({ isOpen, onClose, onSuccess }: CreateShipme
 
     try {
       await api.post('/shipments/', {
-        container_id: containerId,
-        shipping_line: shippingLine
+        container_id: containerId.trim().toUpperCase(),
+        shipping_line: shippingLine,
+        final_destination: finalDestination.trim(),
+        final_destination_port: finalDestinationPort,
+        final_destination_eta: estimatedEta || null
       });
       setContainerId('');
+      setFinalDestination('');
+      setFinalDestinationPort(MIDDLE_EAST_PORTS[0]);
+      setEstimatedEta('');
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -73,7 +99,7 @@ export const CreateShipmentModal = ({ isOpen, onClose, onSuccess }: CreateShipme
             <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          <form onSubmit={handleSubmit} className="p-8 space-y-6">
             {error && (
               <div className="p-4 bg-red-500/5 border border-red-500/20 text-red-500 rounded-2xl text-[10px] font-black flex items-center gap-3">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_#ef4444]" />
@@ -81,9 +107,9 @@ export const CreateShipmentModal = ({ isOpen, onClose, onSuccess }: CreateShipme
               </div>
             )}
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="group">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Container Number</label>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-1">Container Number</label>
                 <div className="relative">
                   <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#FF8A00] transition-colors">
                     <Package className="w-5 h-5" />
@@ -92,7 +118,7 @@ export const CreateShipmentModal = ({ isOpen, onClose, onSuccess }: CreateShipme
                     type="text"
                     required
                     placeholder="ENTER ID... (e.g. MEDU9091004)"
-                    className="w-full pl-14 pr-6 py-5 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:border-[#FF8A00]/40 focus:bg-white/[0.05] transition-all font-black text-white placeholder:text-gray-700 uppercase tracking-wider text-sm shadow-inner"
+                    className="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:border-[#FF8A00]/40 focus:bg-white/[0.05] transition-all font-black text-white placeholder:text-gray-700 uppercase tracking-wider text-sm shadow-inner"
                     value={containerId}
                     onChange={(e) => setContainerId(e.target.value)}
                   />
@@ -100,10 +126,10 @@ export const CreateShipmentModal = ({ isOpen, onClose, onSuccess }: CreateShipme
               </div>
 
               <div className="group">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 ml-1">Shipping Carrier</label>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-1">Shipping Carrier</label>
                 <div className="relative">
                   <select
-                    className="w-full px-6 py-5 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:border-[#FF8A00]/40 focus:bg-white/[0.05] transition-all font-black text-white appearance-none cursor-pointer uppercase tracking-wider text-sm shadow-inner"
+                    className="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:border-[#FF8A00]/40 focus:bg-white/[0.05] transition-all font-black text-white appearance-none cursor-pointer uppercase tracking-wider text-sm shadow-inner"
                     value={shippingLine}
                     onChange={(e) => setShippingLine(e.target.value)}
                   >
@@ -118,13 +144,56 @@ export const CreateShipmentModal = ({ isOpen, onClose, onSuccess }: CreateShipme
                   </div>
                 </div>
               </div>
+
+              <div className="group">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-1">Destination Port</label>
+                <div className="relative">
+                  <select
+                    className="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:border-[#FF8A00]/40 focus:bg-white/[0.05] transition-all font-black text-white appearance-none cursor-pointer uppercase tracking-wider text-xs shadow-inner"
+                    value={finalDestinationPort}
+                    onChange={(e) => setFinalDestinationPort(e.target.value)}
+                  >
+                    {MIDDLE_EAST_PORTS.map(port => (
+                      <option key={port} value={port} className="bg-[#0A0A0A] text-white py-4 font-bold">
+                        {port}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                    <ChevronDown className="w-5 h-5" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="group">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-1">Final Dest.</label>
+                  <input
+                    type="text"
+                    placeholder="WAREHOUSE A"
+                    className="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:border-[#FF8A00]/40 focus:bg-white/[0.05] transition-all font-black text-white placeholder:text-gray-700 uppercase tracking-wider text-xs shadow-inner"
+                    value={finalDestination}
+                    onChange={(e) => setFinalDestination(e.target.value)}
+                  />
+                </div>
+
+                <div className="group">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 ml-1">Estimated ETA</label>
+                  <input
+                    type="date"
+                    className="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:border-[#FF8A00]/40 focus:bg-white/[0.05] transition-all font-black text-white uppercase tracking-wider text-xs shadow-inner [color-scheme:dark]"
+                    value={estimatedEta}
+                    onChange={(e) => setEstimatedEta(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-2">
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full py-8 bg-[#FF8A00] hover:bg-[#FF9D29] text-black font-black rounded-2xl uppercase tracking-[0.2em] text-[12px] shadow-[0_0_40px_rgba(255,138,0,0.2)] hover:shadow-[0_0_50px_rgba(255,138,0,0.4)] transition-all ring-offset-black"
+                className="w-full py-7 bg-[#FF8A00] hover:bg-[#FF9D29] text-black font-black rounded-2xl uppercase tracking-[0.2em] text-[12px] shadow-[0_0_40px_rgba(255,138,0,0.2)] hover:shadow-[0_0_50px_rgba(255,138,0,0.4)] transition-all ring-offset-black"
                 size="lg"
               >
                 {loading ? (
