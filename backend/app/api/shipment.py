@@ -30,7 +30,7 @@ async def create_shipment(
     
     shipment = models.Shipment(
         container_id=shipment_in.container_id,
-        shipping_line_name=shipment_in.shipping_line.value,
+        shipping_line_name=shipment_in.shipping_line,
         final_destination=shipment_in.final_destination,
         final_destination_port=shipment_in.final_destination_port,
         final_destination_eta=shipment_in.final_destination_eta,
@@ -44,6 +44,55 @@ async def create_shipment(
     from app.worker.tasks import update_all_shipments
     update_all_shipments.delay()
     return shipment
+
+@router.post("/bulk", response_model=dict)
+async def bulk_create_shipments(
+    shipments_in: list[schemas.ShipmentBulkCreate],
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    valid_count = 0
+    skipped_count = 0
+    
+    for row in shipments_in:
+        # Check if already exists for user
+        existing_shipment = db.query(models.Shipment).filter(
+            models.Shipment.container_id == row.container_id,
+            models.Shipment.user_id == current_user.id
+        ).first()
+        
+        if existing_shipment:
+            skipped_count += 1
+            continue
+
+        valid_count += 1
+        
+        # We handle potentially missing shipping_line string
+        line_name = row.shipping_line
+        
+        shipment = models.Shipment(
+            container_id=row.container_id,
+            shipping_line_name=line_name,
+            user_id=current_user.id,
+            container_status="Pending",
+            item_code=row.item_code,
+            item_name=row.item_name,
+            coo=row.coo,
+            brand=row.brand,
+            buyer_name=row.buyer_name,
+            ref_no=row.ref_no,
+            doc_status=row.doc_status,
+            order_date=row.order_date
+        )
+        # Parse ETA if provided, for simplicity we treat it flexibly or do rough parsing if it was string
+        # If order_date or others exist
+        db.add(shipment)
+
+    db.commit()
+    from app.worker.tasks import update_all_shipments
+    update_all_shipments.delay()
+    
+    return {"message": f"Successfully uploaded {valid_count} shipments. Skipped {skipped_count} existing.", "valid": valid_count, "skipped": skipped_count}
 
 @router.get("/", response_model=list[schemas.Shipment])
 async def get_my_shipments(

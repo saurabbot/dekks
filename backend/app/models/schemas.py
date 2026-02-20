@@ -55,14 +55,43 @@ class User(UserBase):
 class ShipmentBase(BaseModel):
     container_id: str
     shipping_line_id: Optional[str] = None
-    shipping_line_name: Optional[ShippingLine] = None
+    shipping_line_name: Optional[str] = None
+    item_code: Optional[str] = None
+    item_name: Optional[str] = None
+    coo: Optional[str] = None
+    brand: Optional[str] = None
+    buyer_name: Optional[str] = None
+    ref_no: Optional[str] = None
+    doc_status: Optional[str] = None
+    order_date: Optional[str] = None
 
 class ShipmentCreate(BaseModel):
     container_id: str
-    shipping_line: ShippingLine
+    shipping_line: str
     final_destination: Optional[str] = None
     final_destination_port: Optional[str] = None
     final_destination_eta: Optional[datetime] = None
+    item_code: Optional[str] = None
+    item_name: Optional[str] = None
+    coo: Optional[str] = None
+    brand: Optional[str] = None
+    buyer_name: Optional[str] = None
+    ref_no: Optional[str] = None
+    doc_status: Optional[str] = None
+    order_date: Optional[str] = None
+
+class ShipmentBulkCreate(BaseModel):
+    container_id: str
+    shipping_line: Optional[str] = None
+    item_code: Optional[str] = None
+    item_name: Optional[str] = None
+    coo: Optional[str] = None
+    brand: Optional[str] = None
+    buyer_name: Optional[str] = None
+    ref_no: Optional[str] = None
+    doc_status: Optional[str] = None
+    order_date: Optional[str] = None
+    estimated_eta: Optional[str] = None
 
 class Shipment(ShipmentBase):
     id: int

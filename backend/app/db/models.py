@@ -80,6 +80,15 @@ class Shipment(Base):
     is_public = Column(Boolean, default=False)
     co2_emissions = Column(Float, nullable=True)
 
+    order_date = Column(String, nullable=True)
+    item_code = Column(String, nullable=True)
+    item_name = Column(String, nullable=True)
+    coo = Column(String, nullable=True)
+    brand = Column(String, nullable=True)
+    buyer_name = Column(String, nullable=True)
+    ref_no = Column(String, nullable=True)
+    doc_status = Column(String, nullable=True)
+
     user = relationship("User", back_populates="shipments")
     history = relationship("ShipmentHistory", back_populates="shipment", cascade="all, delete-orphan")
     created_at = Column(DateTime, default=datetime.utcnow)
