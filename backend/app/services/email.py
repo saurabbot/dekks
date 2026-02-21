@@ -1,20 +1,17 @@
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 from typing import List, Optional
 from app.core.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
 
+if settings.RESEND_API_KEY:
+    resend.api_key = settings.RESEND_API_KEY
+
 class EmailService:
     def __init__(self):
-        self.smtp_host = settings.SMTP_HOST
-        self.smtp_port = settings.SMTP_PORT
-        self.smtp_user = settings.SMTP_USER
-        self.smtp_password = settings.SMTP_PASSWORD
-        self.from_email = settings.EMAILS_FROM_EMAIL
-        self.from_name = settings.EMAILS_FROM_NAME
+        self.from_email = settings.EMAILS_FROM_EMAIL or "onboarding@resend.dev"
+        self.from_name = settings.EMAILS_FROM_NAME or "Dekks"
 
     def send_email(
         self,
@@ -23,38 +20,28 @@ class EmailService:
         html_content: str,
         text_content: Optional[str] = None
     ) -> bool:
-        if not all([self.smtp_host, self.smtp_user, self.smtp_password, self.from_email]):
-            logger.warning("Email settings not fully configured. Skipping email send.")
+        if not settings.RESEND_API_KEY:
+            print("❌ Resend API Key not configured. Skipping email send.")
+            logger.warning("Resend API Key not configured. Skipping email send.")
             return False
 
-        message = MIMEMultipart("alternative")
-        message["Subject"] = subject
-        message["From"] = f"{self.from_name} <{self.from_email}>"
-        message["To"] = recipient_email
-
-        if text_content:
-            part1 = MIMEText(text_content, "plain")
-            message.attach(part1)
-
-        part2 = MIMEText(html_content, "html")
-        message.attach(part2)
-
         try:
-            if settings.SMTP_SSL:
-                # Use SMTP_SSL for port 465
-                with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port) as server:
-                    server.login(self.smtp_user, self.smtp_password)
-                    server.sendmail(self.from_email, recipient_email, message.as_string())
-            else:
-                # Use SMTP with STARTTLS for port 587
-                with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
-                    if settings.SMTP_TLS:
-                        server.starttls()
-                    server.login(self.smtp_user, self.smtp_password)
-                    server.sendmail(self.from_email, recipient_email, message.as_string())
+            print(f"Resend: Sending email to {recipient_email}...")
+            params = {
+                "from": f"{self.from_name} <{self.from_email}>",
+                "to": [recipient_email],
+                "subject": subject,
+                "html": html_content,
+            }
+            if text_content:
+                params["text"] = text_content
+
+            r = resend.Emails.send(params)
+            print(f"Resend: Email sent successfully. ID: {getattr(r, 'id', 'unknown')}")
             return True
         except Exception as e:
-            logger.error(f"Error sending email to {recipient_email}: {str(e)}")
+            print(f"Resend Error: {str(e)}")
+            logger.error(f"Error sending email via Resend to {recipient_email}: {str(e)}")
             return False
 
     def send_shipment_update(self, recipient_email: str, shipment_id: str, status: str):

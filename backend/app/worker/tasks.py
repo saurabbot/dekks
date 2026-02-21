@@ -140,4 +140,10 @@ def send_notification_email(recipient_email: str, subject: str, html_content: st
 
 @shared_task
 def send_email_verification_mail(recipient_email: str, subject: str, html_content: str):
-    email_service.send_email(recipient_email, subject, html_content)
+    print(f"Worker: Starting email verification task for {recipient_email}")
+    try:
+        email_service.send_email(recipient_email, subject, html_content)
+        print(f"Worker: Email verification sent successfully to {recipient_email}")
+    except Exception as e:
+        print(f"Worker: Failed to send email to {recipient_email}. Error: {str(e)}")
+        raise e

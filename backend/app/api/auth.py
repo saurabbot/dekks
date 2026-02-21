@@ -18,10 +18,12 @@ router = APIRouter()
 async def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == user_in.email).first()
     if user:
+        print(f"Registration failed: User {user_in.email} already exists")
         raise HTTPException(
             status_code=400,
             detail="The user with this email already exists in the system.",
         )
+    print(f"Creating new user: {user_in.email}")
     user = models.User(
         email=user_in.email,
         hashed_password=security.get_password_hash(user_in.password),
@@ -41,9 +43,12 @@ async def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     db.add(token)
     db.commit()
     db.refresh(token)
+    print(f"Verification token created for {user.email}")
     verification_url = f"{settings.FRONTEND_URL}/verify-email?token={verification_token}"
     html_content = email_service.get_welcome_mail_content(user.email, user.first_name, verification_url)
+    print(f"Dispatching verification email via Celery to {user.email}")
     send_email_verification_mail.delay(user.email, "🚢 Welcome to Dekks - Verify Your Account", html_content)
+    print(f"Registration successful for {user.email}")
     return user
 
 @router.post("/login", response_model=schemas.Token)

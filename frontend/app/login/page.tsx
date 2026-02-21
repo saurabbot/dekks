@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Github, Chrome, Shield, Key, ArrowRight, Mail, Lock } from 'lucide-react';
+import { Github, Chrome, Shield, Key, ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
@@ -139,14 +140,25 @@ export default function LoginPage() {
                         <Lock className="w-5 h-5" />
                       </div>
                       <input
-                        type="password"
+                        type={isPasswordVisible ? "text" : "password"}
                         placeholder="Password"
                         required
                         autoFocus
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-gray-600 focus:border-propulsion-orange/50 focus:outline-none transition-all font-medium"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white placeholder:text-gray-600 focus:border-propulsion-orange/50 focus:outline-none transition-all font-medium"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
+                      <button
+                        type="button"
+                        onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors p-1"
+                      >
+                        {isPasswordVisible ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
                     </motion.div>
                   )}
                 </AnimatePresence>

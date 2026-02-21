@@ -104,7 +104,7 @@ export const ShipmentDetailsModal = ({ isOpen, onClose, shipment, onUpdate }: Sh
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-propulsion-orange text-black' : 'text-gray-500 hover:text-white'}`}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-propulsion-orange text-black' : 'text-gray-500 hover:text-white'}`}
                   >
                     <tab.icon className="w-3.5 h-3.5" />
                     {tab.label}
@@ -140,7 +140,7 @@ export const ShipmentDetailsModal = ({ isOpen, onClose, shipment, onUpdate }: Sh
                     <span className="text-[9px] font-black text-black/50 uppercase tracking-[0.2em]">Operational Status</span>
                     <Info className="w-4 h-4 text-black/30" />
                   </div>
-                  <h3 className="text-3xl font-black uppercase tracking-tighter leading-[0.9]">{data.container_status || 'DETECTING'}</h3>
+                  <h3 className="text-3xl font-black uppercase tracking-tighter leading-[0.9] truncate">{data.container_status || 'DETECTING'}</h3>
                   <div className="pt-2 flex items-center gap-3">
                     <div className="px-3 py-1.5 bg-black rounded-xl text-propulsion-orange text-[9px] font-black uppercase tracking-widest">Priority One</div>
                   </div>
@@ -260,7 +260,7 @@ export const ShipmentDetailsModal = ({ isOpen, onClose, shipment, onUpdate }: Sh
                             </div>
                             <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Final Terminal</h4>
                             <div className="space-y-1">
-                              <h2 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">{data.final_destination_port || 'PENDING'}</h2>
+                               <h2 className="text-3xl font-black text-white tracking-tighter uppercase leading-none truncate">{data.final_destination_port || 'PENDING'}</h2>
                               <p className="text-sm font-bold text-gray-500 uppercase tracking-tight">{data.final_destination || 'Awaiting Arrival'}</p>
                             </div>
                           </div>
@@ -414,7 +414,7 @@ export const ShipmentDetailsModal = ({ isOpen, onClose, shipment, onUpdate }: Sh
                       <div className="p-12 bg-gradient-to-br from-emerald-500/20 to-transparent border border-emerald-500/20 rounded-[3rem] relative overflow-hidden flex flex-col justify-between">
                         <div className="space-y-6">
                           <Globe className="w-16 h-16 text-[#00FFBD] mb-10" />
-                          <h2 className="text-5xl font-black text-white tracking-tighter uppercase leading-[0.8]">Sustainability Report</h2>
+                          <h2 className="text-4xl font-black text-white tracking-tighter uppercase leading-[0.9] whitespace-nowrap">Sustainability Report</h2>
                           <p className="text-sm text-gray-400 font-medium max-w-[400px]">Advanced real-time carbon tracking based on actual vessel efficiency and voyage route data.</p>
                         </div>
                         <div className="mt-20">
